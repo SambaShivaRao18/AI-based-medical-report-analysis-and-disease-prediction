@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - MediAnalyze</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            padding: 100px 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome-text h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-text p {
+            opacity: 0.9;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(42, 157, 143, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon i {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .module-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .module-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .module-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .module-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .module-card p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .module-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .module-link i {
+            font-size: 0.9rem;
+            transition: transform 0.3s;
+        }
+
+        .module-card:hover .module-link i {
+            transform: translateX(5px);
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .activity-header h3 {
+            color: var(--secondary);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .activity-icon i {
+            color: var(--primary);
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--primary);
+            animation: spin 1s infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 15px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .doctor-badge {
+            background: #ffd700;
+            color: var(--secondary);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>MediAnalyze</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="doctor-dashboard.html">Dashboard</a></li>
+                <li><a href="report-analysis.html">Analysis</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="#" id="logoutBtn" class="btn-outline">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div id="loadingSpinner" class="loading">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <p>Loading your dashboard...</p>
+        </div>
+
+        <div id="dashboardContent" style="display: none;">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome-text">
+                    <h1>Welcome, Dr. <span id="userName"></span>!</h1>
+                    <p>Your clinical dashboard is ready</p>
+                </div>
+                <div class="user-badge">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctor</span>
+                    <span class="doctor-badge">Verified</span>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                    <div class="stat-number" id="reportCount">0</div>
+                    <div class="stat-label">Reports Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number" id="patientCount">0</div>
+                    <div class="stat-label">Patients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number" id="criticalCount">0</div>
+                    <div class="stat-label">Critical Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="pendingCount">0</div>
+                    <div class="stat-label">Pending Reviews</div>
+                </div>
+            </div>
+
+            <!-- Modules Grid -->
+            <h2 style="margin: 30px 0 20px; color: var(--secondary);">Clinical Tools</h2>
+            <div class="modules-grid">
+                <div class="module-card" onclick="window.location.href='report-analysis.html'">
+                    <div class="module-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                    <h3>Report Analysis</h3>
+                    <p>Upload and analyze medical reports with AI (Technical analysis)</p>
+                    <a href="report-analysis.html" class="module-link">
+                        Analyze Report <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="module-card" onclick="window.location.href='chatbot.html'">
+                    <div class="module-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Health Chatbot</h3>
+                    <p>Get clinical insights and medical information</p>
+                    <a href="chatbot.html" class="module-link">
+                        Start Chatting <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="module-card" onclick="window.location.href='symptom-checker.html'">
+                    <div class="module-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h3>Symptom Checker</h3>
+                    <p>Check symptoms for differential diagnosis</p>
+                    <a href="symptom-checker.html" class="module-link">
+                        Check Symptoms <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="module-card" onclick="window.location.href='drug-interaction.html'">
+                    <div class="module-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h3>Drug Interaction</h3>
+                    <p>Check medication compatibility and contraindications</p>
+                    <a href="drug-interaction.html" class="module-link">
+                        Check Drugs <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <div class="activity-header">
+                    <h3><i class="fas fa-history"></i> Recent Patient Reports</h3>
+                    <a href="#" style="color: var(--primary);">View All</a>
+                </div>
+                <div id="recentActivity">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">John Doe - Blood Test Report</div>
+                            <div class="activity-time">Reviewed 2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Jane Smith - MRI Scan</div>
+                            <div class="activity-time">Reviewed yesterday</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Critical: Robert Johnson - Cardiac Report</div>
+                            <div class="activity-time">Action needed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in and is a doctor
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        console.log('Doctor dashboard - User:', user);
+
+        if (!token || !user) {
+            console.log('No user, redirecting to login');
+            window.location.href = 'login.html';
+        } else if (user.role !== 'doctor') {
+            console.log('User is not a doctor, redirecting to patient dashboard');
+            window.location.href = 'dashboard.html';
+        } else {
+            // Load dashboard
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+            
+            // Update user info
+            document.getElementById('userName').textContent = user.name || 'Doctor';
+            
+            // Set dummy stats (replace with real data later)
+            document.getElementById('reportCount').textContent = '24';
+            document.getElementById('patientCount').textContent = '18';
+            document.getElementById('criticalCount').textContent = '3';
+            document.getElementById('pendingCount').textContent = '7';
+        }
+
+        // Logout function
+        window.logout = function() {
+            console.log('Logging out...');
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        };
+
+        // Also handle logout button
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

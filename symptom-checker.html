@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker - MediAnalyze</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .symptom-container {
+            padding: 100px 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .symptom-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .symptom-header h1 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .symptom-header p {
+            color: var(--gray);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .symptom-input-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .symptom-tag {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .symptom-tag:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .symptom-tag.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .selected-symptoms {
+            margin: 20px 0;
+            min-height: 60px;
+        }
+
+        .selected-symptom {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 50px;
+            margin: 5px;
+            font-size: 0.9rem;
+        }
+
+        .selected-symptom i {
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .predict-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .predict-btn:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .disease-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .disease-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+
+        .confidence-text {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .symptoms-matched {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .matched-symptom {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+        }
+
+        .disclaimer {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--primary);
+            animation: spin 1s infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>MediAnalyze</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="index.html" class="btn-outline">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="symptom-container">
+        <div class="symptom-header">
+            <h1><i class="fas fa-stethoscope" style="color: var(--primary);"></i> Symptom Checker</h1>
+            <p>Select your symptoms and get possible disease predictions</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Left side - Symptom selection -->
+            <div class="symptom-input-card">
+                <h2 style="margin-bottom: 20px;">Select Your Symptoms</h2>
+                
+                <div class="search-box">
+                    <input type="text" id="symptomSearch" placeholder="Search symptoms...">
+                </div>
+
+                <div class="symptoms-grid" id="symptomsGrid">
+                    <!-- Symptoms will be loaded here via JavaScript -->
+                </div>
+
+                <div class="selected-symptoms" id="selectedSymptoms">
+                    <!-- Selected symptoms will appear here -->
+                </div>
+
+                <button class="predict-btn" id="predictBtn" disabled onclick="predictDisease()">
+                    Predict Possible Diseases
+                </button>
+
+                <div class="disclaimer">
+                    <i class="fas fa-info-circle"></i>
+                    This is for informational purposes only. Always consult with a healthcare professional for medical advice.
+                </div>
+            </div>
+
+            <!-- Right side - Results -->
+            <div class="results-card" id="resultsCard">
+                <h2 style="margin-bottom: 20px;">Prediction Results</h2>
+                
+                <div id="resultsContent">
+                    <div style="text-align: center; color: var(--gray); padding: 40px;">
+                        <i class="fas fa-arrow-left" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p style="margin-top: 20px;">Select symptoms and click predict to see results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample symptoms list (expand this with real medical symptoms)
+        const symptomsList = [
+            'Fever', 'Cough', 'Headache', 'Fatigue', 'Nausea', 
+            'Dizziness', 'Chest Pain', 'Shortness of Breath', 'Sore Throat',
+            'Runny Nose', 'Muscle Pain', 'Joint Pain', 'Back Pain',
+            'Abdominal Pain', 'Vomiting', 'Diarrhea', 'Constipation',
+            'Loss of Appetite', 'Weight Loss', 'Weight Gain', 'Swelling',
+            'Rash', 'Itching', 'Fever with Chills', 'Night Sweats',
+            'Blurred Vision', 'Eye Pain', 'Ear Pain', 'Ringing in Ears',
+            'Loss of Taste', 'Loss of Smell', 'Anxiety', 'Depression',
+            'Insomnia', 'Palpitations', 'High Blood Pressure', 'Low Blood Pressure'
+        ];
+
+        let selectedSymptoms = [];
+
+        // Initialize symptoms grid
+        function initializeSymptoms() {
+            const grid = document.getElementById('symptomsGrid');
+            symptomsList.forEach(symptom => {
+                const div = document.createElement('div');
+                div.className = 'symptom-tag';
+                div.textContent = symptom;
+                div.onclick = () => toggleSymptom(symptom, div);
+                grid.appendChild(div);
+            });
+        }
+
+        // Search functionality
+        document.getElementById('symptomSearch').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const symptoms = document.querySelectorAll('.symptom-tag');
+            
+            symptoms.forEach(symptom => {
+                const text = symptom.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    symptom.style.display = 'block';
+                } else {
+                    symptom.style.display = 'none';
+                }
+            });
+        });
+
+        // Toggle symptom selection
+        function toggleSymptom(symptom, element) {
+            const index = selectedSymptoms.indexOf(symptom);
+            
+            if (index === -1) {
+                selectedSymptoms.push(symptom);
+                element.classList.add('selected');
+            } else {
+                selectedSymptoms.splice(index, 1);
+                element.classList.remove('selected');
+            }
+            
+            updateSelectedSymptoms();
+            updatePredictButton();
+        }
+
+        // Update selected symptoms display
+        function updateSelectedSymptoms() {
+            const container = document.getElementById('selectedSymptoms');
+            container.innerHTML = '';
+            
+            selectedSymptoms.forEach(symptom => {
+                const tag = document.createElement('span');
+                tag.className = 'selected-symptom';
+                tag.innerHTML = `${symptom} <i class="fas fa-times" onclick="removeSymptom('${symptom}')"></i>`;
+                container.appendChild(tag);
+            });
+        }
+
+        // Remove symptom
+        function removeSymptom(symptom) {
+            const index = selectedSymptoms.indexOf(symptom);
+            if (index > -1) {
+                selectedSymptoms.splice(index, 1);
+                
+                // Update grid
+                const symptoms = document.querySelectorAll('.symptom-tag');
+                symptoms.forEach(s => {
+                    if (s.textContent === symptom) {
+                        s.classList.remove('selected');
+                    }
+                });
+                
+                updateSelectedSymptoms();
+                updatePredictButton();
+            }
+        }
+
+        // Update predict button state
+        function updatePredictButton() {
+            const btn = document.getElementById('predictBtn');
+            btn.disabled = selectedSymptoms.length < 2;
+        }
+
+        // Predict disease
+        function predictDisease() {
+            const resultsContent = document.getElementById('resultsContent');
+            
+            // Show loading
+            resultsContent.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-circle-notch"></i>
+                    <p style="margin-top: 20px;">Analyzing symptoms...</p>
+                </div>
+            `;
+
+            // Simulate API call
+            setTimeout(() => {
+                const predictions = generatePredictions(selectedSymptoms);
+                displayResults(predictions);
+            }, 2000);
+        }
+
+        // Generate sample predictions (replace with actual AI model)
+        function generatePredictions(symptoms) {
+            // This is sample logic - replace with actual ML model
+            const predictions = [];
+            
+            const diseaseDatabase = {
+                'Common Cold': { symptoms: ['Fever', 'Cough', 'Runny Nose', 'Sore Throat'], probability: 0 },
+                'Flu': { symptoms: ['Fever', 'Cough', 'Fatigue', 'Muscle Pain', 'Headache'], probability: 0 },
+                'Allergies': { symptoms: ['Runny Nose', 'Sneezing', 'Itchy Eyes', 'Cough'], probability: 0 },
+                'Migraine': { symptoms: ['Headache', 'Nausea', 'Blurred Vision', 'Sensitivity to Light'], probability: 0 },
+                'Gastroenteritis': { symptoms: ['Nausea', 'Vomiting', 'Diarrhea', 'Abdominal Pain'], probability: 0 },
+                'COVID-19': { symptoms: ['Fever', 'Cough', 'Loss of Taste', 'Loss of Smell', 'Fatigue'], probability: 0 },
+                'Pneumonia': { symptoms: ['Fever', 'Cough', 'Chest Pain', 'Shortness of Breath', 'Fatigue'], probability: 0 },
+                'Bronchitis': { symptoms: ['Cough', 'Fatigue', 'Shortness of Breath', 'Chest Discomfort'], probability: 0 }
+            };
+
+            // Calculate probabilities based on symptom matches
+            for (const [disease, data] of Object.entries(diseaseDatabase)) {
+                const matchingSymptoms = symptoms.filter(s => data.symptoms.includes(s));
+                const probability = (matchingSymptoms.length / data.symptoms.length) * 100;
+                
+                if (matchingSymptoms.length > 0) {
+                    predictions.push({
+                        name: disease,
+                        probability: Math.round(probability),
+                        matchedSymptoms: matchingSymptoms,
+                        totalSymptoms: data.symptoms.length
+                    });
+                }
+            }
+
+            // Sort by probability
+            return predictions.sort((a, b) => b.probability - a.probability).slice(0, 5);
+        }
+
+        // Display results
+        function displayResults(predictions) {
+            const resultsContent = document.getElementById('resultsContent');
+            
+            if (predictions.length === 0) {
+                resultsContent.innerHTML = `
+                    <div style="text-align: center; color: var(--gray); padding: 40px;">
+                        <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p style="margin-top: 20px;">No matching conditions found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            predictions.forEach(pred => {
+                html += `
+                    <div class="disease-card">
+                        <div class="disease-name">${pred.name}</div>
+                        <div class="confidence-text">Match Probability: ${pred.probability}%</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${pred.probability}%"></div>
+                        </div>
+                        <div class="symptoms-matched">
+                            ${pred.matchedSymptoms.map(s => `<span class="matched-symptom">${s}</span>`).join('')}
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--gray);">
+                            Matched ${pred.matchedSymptoms.length} of ${pred.totalSymptoms} typical symptoms
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="disclaimer">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    These predictions are based on symptom matching and should not replace professional medical diagnosis.
+                </div>
+            `;
+
+            resultsContent.innerHTML = html;
+        }
+
+        // Initialize on page load
+        initializeSymptoms();
+    </script>
+</body>
+</html>

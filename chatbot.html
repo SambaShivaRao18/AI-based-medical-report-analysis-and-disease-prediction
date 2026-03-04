@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Chatbot - MediAnalyze</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .chatbot-container {
+            padding: 100px 20px 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chat-header h1 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .chat-header p {
+            color: var(--gray);
+        }
+
+        .chat-main {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .bot .message-content {
+            background: #f0f0f0;
+            color: var(--dark);
+            border-bottom-left-radius: 5px;
+        }
+
+        .user .message-content {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            background: white;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .send-btn i {
+            font-size: 1.2rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .quick-action:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 15px 20px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--gray);
+            border-radius: 50%;
+            animation: typing 1s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>MediAnalyze</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="index.html" class="btn-outline">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="chatbot-container">
+        <div class="chat-header">
+            <h1><i class="fas fa-robot" style="color: var(--primary);"></i> Health Assistant Chatbot</h1>
+            <p>Ask me anything about your health, diet, medications, or wellness tips!</p>
+        </div>
+
+        <div class="chat-main">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome message -->
+                <div class="message bot">
+                    <div class="message-content">
+                        👋 Hello! I'm your AI health assistant. How can I help you today?
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <span class="quick-action" data-query="What are healthy eating tips?">🥗 Healthy eating</span>
+                <span class="quick-action" data-query="Give me a daily routine for good health">📅 Daily routine</span>
+                <span class="quick-action" data-query="Tips for better sleep">😴 Sleep tips</span>
+                <span class="quick-action" data-query="Exercise recommendations">🏃‍♂️ Exercise</span>
+                <span class="quick-action" data-query="How to reduce stress?">🧘 Stress relief</span>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="userInput" placeholder="Type your health question..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+
+        // Quick action clicks
+        document.querySelectorAll('.quick-action').forEach(action => {
+            action.addEventListener('click', () => {
+                const query = action.dataset.query;
+                userInput.value = query;
+                sendMessage();
+            });
+        });
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Simulate AI response (replace with actual API call)
+            setTimeout(() => {
+                removeTypingIndicator();
+                const response = generateResponse(message);
+                addMessage(response, 'bot');
+            }, 1500);
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${text}
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'message bot';
+            indicator.id = 'typingIndicator';
+            indicator.innerHTML = `
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatMessages.appendChild(indicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function generateResponse(query) {
+            // Sample responses (replace with actual AI responses)
+            const responses = {
+                'healthy eating': '🥗 Here are some healthy eating tips:\n• Eat a variety of colorful fruits and vegetables\n• Include lean proteins like fish, chicken, and legumes\n• Choose whole grains over refined carbs\n• Stay hydrated with water (8-10 glasses daily)\n• Limit processed foods and added sugars',
+                
+                'daily routine': '📅 Here\'s a healthy daily routine:\n• 7:00 AM: Wake up, drink water\n• 8:00 AM: Healthy breakfast\n• 10:00 AM: Short stretching break\n• 12:30 PM: Nutritious lunch\n• 3:00 PM: Light snack\n• 6:00 PM: 30-min exercise\n• 8:00 PM: Light dinner\n• 10:30 PM: Wind down\n• 11:00 PM: Sleep',
+                
+                'sleep': '😴 Tips for better sleep:\n• Maintain consistent sleep schedule\n• Avoid screens 1 hour before bed\n• Create dark, cool sleeping environment\n• Limit caffeine after 2 PM\n• Try relaxation techniques\n• Avoid heavy meals before bedtime',
+                
+                'exercise': '🏃‍♂️ Exercise recommendations:\n• 150 mins moderate aerobic activity weekly\n• Strength training 2x per week\n• Include flexibility exercises\n• Start slowly if new to exercise\n• Listen to your body\n• Stay hydrated during workouts',
+                
+                'stress': '🧘 Stress management tips:\n• Practice deep breathing exercises\n• Take regular breaks during work\n• Engage in hobbies you enjoy\n• Connect with friends and family\n• Consider meditation or yoga\n• Get adequate sleep',
+                
+                'default': 'I understand you\'re asking about health. Could you please provide more specific details so I can give you a more helpful response? For example, you can ask about diet tips, exercise routines, sleep advice, or stress management.'
+            };
+
+            // Simple keyword matching
+            const lowercaseQuery = query.toLowerCase();
+            if (lowercaseQuery.includes('eat') || lowercaseQuery.includes('diet') || lowercaseQuery.includes('food')) {
+                return responses['healthy eating'];
+            } else if (lowercaseQuery.includes('routine') || lowercaseQuery.includes('schedule')) {
+                return responses['daily routine'];
+            } else if (lowercaseQuery.includes('sleep') || lowercaseQuery.includes('insomnia')) {
+                return responses['sleep'];
+            } else if (lowercaseQuery.includes('exercise') || lowercaseQuery.includes('workout') || lowercaseQuery.includes('fitness')) {
+                return responses['exercise'];
+            } else if (lowercaseQuery.includes('stress') || lowercaseQuery.includes('anxiety') || lowercaseQuery.includes('relax')) {
+                return responses['stress'];
+            } else {
+                return responses['default'];
+            }
+        }
+    </script>
+</body>
+</html>

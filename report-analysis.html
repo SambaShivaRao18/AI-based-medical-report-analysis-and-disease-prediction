@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Analysis - MediAnalyze</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Override any conflicting styles */
+        .report-container {
+            padding: 100px 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 40px;
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .upload-section h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .upload-section p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+        }
+
+        /* Role selector styling */
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+
+        .role-btn {
+            flex: 0 1 200px;
+            padding: 12px 25px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .role-btn.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .role-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .role-btn.active:hover {
+            background: white;
+        }
+
+        /* Patient details form */
+        .patient-details {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .patient-details h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: var(--secondary);
+            color: white;
+            padding: 10px;
+        }
+
+        /* File upload area */
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 25px 0;
+        }
+
+        .upload-area:hover {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .upload-area h3 {
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .upload-area p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* File info display */
+        .file-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .file-info i {
+            margin-right: 10px;
+            color: white;
+        }
+
+        /* Analyze button */
+        .btn-analyze {
+            background: white;
+            color: var(--primary);
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Results section */
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: var(--shadow);
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-section h2 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        /* Analysis content styling */
+        .analysis-content {
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            line-height: 1.8;
+            color: var(--dark);
+        }
+
+        .analysis-content h3 {
+            color: var(--primary);
+            margin: 25px 0 15px;
+            font-size: 1.4rem;
+        }
+
+        .analysis-content h4 {
+            color: var(--secondary);
+            margin: 20px 0 10px;
+        }
+
+        .analysis-content ul {
+            margin: 10px 0 20px 25px;
+        }
+
+        .analysis-content li {
+            margin-bottom: 8px;
+        }
+
+        .analysis-content blockquote {
+            border-left: 4px solid var(--primary);
+            padding: 15px 25px;
+            background: #e8f5e9;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            color: var(--dark);
+        }
+
+        .analysis-content p {
+            margin-bottom: 15px;
+        }
+
+        /* Model badge */
+        .model-badge {
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        /* Loading spinner */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--primary);
+            animation: spin 1s infinite;
+        }
+
+        .loading p {
+            margin-top: 15px;
+            color: var(--gray);
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Messages */
+        .error-message {
+            background: #fee;
+            color: var(--danger);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--danger);
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+        }
+
+        /* Patient/Doctor views */
+        .patient-view,
+        .doctor-view {
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .upload-section {
+                padding: 25px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .role-selector {
+                flex-direction: column;
+            }
+
+            .role-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>MediAnalyze</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="#" id="logoutBtn" class="btn-outline">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="report-container">
+        <!-- Login Check (hidden by default) -->
+        <div id="loginCheck" style="display: none; text-align: center; padding: 50px;">
+            <div class="error-message" style="display: block;">
+                <i class="fas fa-exclamation-triangle"></i>
+                Please <a href="login.html" style="color: var(--primary); text-decoration: underline;">login</a> to use
+                this feature.
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent">
+            <div class="upload-section">
+                <h1><i class="fas fa-file-medical"></i> Medical Report Analysis</h1>
+                <p>Upload a medical report PDF and get AI-powered insights</p>
+
+                <!-- Role Selector -->
+                <div class="role-selector">
+                    <button class="role-btn active" data-role="patient">👤 Patient View</button>
+                    <button class="role-btn" data-role="doctor">👨‍⚕️ Doctor View</button>
+                </div>
+
+                <!-- Patient Details Form -->
+                <div class="patient-details">
+                    <h3><i class="fas fa-user-injured"></i> Patient Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <input type="text" id="patientName" placeholder="Patient Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="age" placeholder="Age" min="1" max="120" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Area -->
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Drag & Drop your PDF file here</h3>
+                    <p>or click to browse (Max 20MB)</p>
+                    <input type="file" id="fileInput" hidden accept=".pdf">
+                </div>
+
+                <!-- File Info Display -->
+                <div class="file-info" id="fileInfo">
+                    <i class="fas fa-file-pdf"></i>
+                    <span id="fileName"></span>
+                    <span style="float: right;">(<span id="fileSize"></span>)</span>
+                </div>
+
+                <!-- Analyze Button -->
+                <button class="btn-analyze" id="analyzeBtn">
+                    <i class="fas fa-robot"></i> Analyze Report
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <h2><i class="fas fa-chart-bar"></i> Analysis Results</h2>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="loading" style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <p>Analyzing your report... This may take a moment.</p>
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message" style="display: none;"></div>
+
+                <!-- Analysis View (Single view for both roles) -->
+                <div class="patient-view" id="patientView" style="display: none;">
+                    <div class="file-info" id="resultFileInfo"
+                        style="display: flex; background: #f0f0f0; color: var(--dark); margin-bottom: 20px;">
+                        <i class="fas fa-file-pdf"></i>
+                        <span id="resultFileName"></span>
+                    </div>
+
+                    <!-- Model Used Badge -->
+                    <div id="modelBadge" class="model-badge" style="display: none;"></div>
+
+                    <!-- Analysis Content -->
+                    <div id="analysisContent" class="analysis-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        console.log('Current user role:', user?.role); // Debug log
+
+        if (!token || !user) {
+            document.getElementById('loginCheck').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const analysisContent = document.getElementById('analysisContent');
+
+        // Remove role selector if it exists
+        const roleSelector = document.querySelector('.role-selector');
+        if (roleSelector) {
+            roleSelector.style.display = 'none';
+        }
+
+        let selectedFile = null;
+
+        // File upload handlers
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'white';
+            uploadArea.style.background = 'rgba(255,255,255,0.1)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'rgba(255,255,255,0.3)';
+            uploadArea.style.background = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(255,255,255,0.3)';
+            uploadArea.style.background = 'transparent';
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                handleFileSelect(file);
+            } else {
+                showNotification('Please upload a PDF file', 'error');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileSelect(file);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file.size > 20 * 1024 * 1024) {
+                showNotification('File size exceeds 20MB limit', 'error');
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            fileInfo.style.display = 'block';
+        }
+
+        // Analyze button click
+        analyzeBtn.addEventListener('click', async () => {
+            const patientName = document.getElementById('patientName').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value;
+
+            if (!patientName || !age || !gender) {
+                showNotification('Please fill in all patient details', 'error');
+                return;
+            }
+
+            if (!selectedFile) {
+                showNotification('Please select a PDF file to analyze', 'error');
+                return;
+            }
+
+            // Show loading
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+
+            resultsSection.style.display = 'block';
+            loadingSpinner.style.display = 'block';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            analysisContent.innerHTML = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('patient_name', patientName);
+                formData.append('age', age);
+                formData.append('gender', gender);
+                formData.append('pdf_file', selectedFile);
+                formData.append('userId', user.id);
+                // No need to send role separately - Node.js gets it from database
+
+                const response = await fetch('http://127.0.0.1:5000/api/reports/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                loadingSpinner.style.display = 'none';
+
+                if (data.success) {
+                    successMessage.style.display = 'block';
+
+                    // Show different success message based on role
+                    if (data.userRole === 'doctor') {
+                        successMessage.innerHTML = '✅ <strong>Technical Analysis Complete</strong> - Detailed clinical findings ready';
+                    } else {
+                        successMessage.innerHTML = '✅ <strong>Analysis Complete</strong> - Your health summary is ready';
+                    }
+
+                    document.getElementById('resultFileName').textContent = selectedFile.name;
+
+                    if (data.model_used) {
+                        document.getElementById('modelBadge').style.display = 'inline-block';
+                        document.getElementById('modelBadge').textContent = `🤖 Model: ${data.model_used}`;
+                    }
+
+                    // Render the analysis
+                    if (window.marked) {
+                        analysisContent.innerHTML = marked.parse(data.analysis);
+                    } else {
+                        analysisContent.innerHTML = data.analysis.replace(/\n/g, '<br>');
+                    }
+
+                    // Show the analysis
+                    document.getElementById('patientView').style.display = 'block';
+
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = '❌ ' + (data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                loadingSpinner.style.display = 'none';
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = '❌ Network error. Please check if servers are running.';
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-robot"></i> Analyze Report';
+            }
+        });
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'error' ? '#f44336' : '#4caf50'};
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        `;
+            notification.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Make sure logout button works
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('Logging out...');
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+
+</html>

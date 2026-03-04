@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*/
+
+# Flask/Python specific
+instance/
+.webassets-cache
+.env
+.flaskenv
+*.db
+*.sqlite3
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Backend
+backend/node_modules/
+backend/.env
+backend/package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-*
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Uploads
+uploads/
+temp/
+*.pdf
+!sample.pdf
+*.tmp
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+
+# Docker
+*.pid
+docker-compose.override.yml
+Dockerfile.dev
+
+# Project specific
+medical-report-analysis/backend/.env
+medical-report-analysis/modules/report_analyzer/.env
+medical-report-analysis/modules/report_analyzer/__pycache__/
+medical-report-analysis/modules/report_analyzer/venv/
+
+# Secrets
+*.key
+*.pem
+*.crt
+secrets/

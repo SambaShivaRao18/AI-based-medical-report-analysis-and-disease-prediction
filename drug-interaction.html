@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Interaction Checker - MediAnalyze</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .drug-container {
+            padding: 100px 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .drug-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .drug-header h1 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .drug-header p {
+            color: var(--gray);
+        }
+
+        .medication-form {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .form-row input {
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-row input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 10px;
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-right: 15px;
+        }
+
+        .add-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .check-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .check-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .interaction-card {
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .interaction-card.danger {
+            background: #fee;
+            border-left-color: var(--danger);
+        }
+
+        .interaction-card.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .interaction-card.safe {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .medication-pair {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .severity-badge.danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .severity-badge.warning {
+            background: #ffc107;
+            color: var(--dark);
+        }
+
+        .severity-badge.safe {
+            background: #4caf50;
+            color: white;
+        }
+
+        .timeline-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .timeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ddd;
+            z-index: 1;
+        }
+
+        .timeline-item {
+            position: relative;
+            z-index: 2;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .timeline-item.warning {
+            border-color: var(--danger);
+            background: #fee;
+        }
+
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendation-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .recommendation-list li i {
+            margin-right: 10px;
+        }
+
+        .recommendation-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>MediAnalyze</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="index.html" class="btn-outline">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="drug-container">
+        <div class="drug-header">
+            <h1><i class="fas fa-pills" style="color: var(--primary);"></i> Drug Interaction Checker</h1>
+            <p>Check for harmful interactions between your medications</p>
+        </div>
+
+        <div class="medication-form" id="medicationForm">
+            <h3 style="margin-bottom: 20px;">Add Your Medications</h3>
+            
+            <div id="medicationsList">
+                <!-- Medication rows will be added here -->
+                <div class="form-row" id="medRow1">
+                    <input type="text" placeholder="Medicine name" class="med-name" list="medicines">
+                    <input type="text" placeholder="Dosage (e.g., 500mg)" class="med-dosage">
+                    <input type="text" placeholder="Timing (e.g., 8:00 AM)" class="med-timing">
+                    <button class="remove-btn" onclick="removeMedication(1)" style="visibility: hidden;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <button class="add-btn" onclick="addMedication()">
+                    <i class="fas fa-plus"></i> Add Another Medication
+                </button>
+            </div>
+
+            <button class="check-btn" onclick="checkInteractions()">
+                <i class="fas fa-search"></i> Check Interactions
+            </button>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h2 style="margin-bottom: 20px;">Interaction Analysis Results</h2>
+            
+            <div id="interactionResults">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <datalist id="medicines">
+        <option value="Aspirin">
+        <option value="Ibuprofen">
+        <option value="Paracetamol">
+        <option value="Amoxicillin">
+        <option value="Metformin">
+        <option value="Lisinopril">
+        <option value="Atorvastatin">
+        <option value="Omeprazole">
+        <option value="Warfarin">
+        <option value="Levothyroxine">
+    </datalist>
+
+    <script>
+        let medicationCount = 1;
+
+        function addMedication() {
+            medicationCount++;
+            const list = document.getElementById('medicationsList');
+            const newRow = document.createElement('div');
+            newRow.className = 'form-row';
+            newRow.id = `medRow${medicationCount}`;
+            newRow.innerHTML = `
+                <input type="text" placeholder="Medicine name" class="med-name" list="medicines">
+                <input type="text" placeholder="Dosage (e.g., 500mg)" class="med-dosage">
+                <input type="text" placeholder="Timing (e.g., 8:00 AM)" class="med-timing">
+                <button class="remove-btn" onclick="removeMedication(${medicationCount})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            list.appendChild(newRow);
+
+            // Show remove button on first row if hidden
+            const firstRow = document.getElementById('medRow1');
+            if (firstRow) {
+                const firstRemoveBtn = firstRow.querySelector('.remove-btn');
+                if (firstRemoveBtn) {
+                    firstRemoveBtn.style.visibility = 'visible';
+                }
+            }
+        }
+
+        function removeMedication(id) {
+            const row = document.getElementById(`medRow${id}`);
+            row.remove();
+
+            // If only one row left, hide its remove button
+            const rows = document.querySelectorAll('.form-row');
+            if (rows.length === 1) {
+                const removeBtn = rows[0].querySelector('.remove-btn');
+                if (removeBtn) {
+                    removeBtn.style.visibility = 'hidden';
+                }
+            }
+        }
+
+        function checkInteractions() {
+            const medications = [];
+            const rows = document.querySelectorAll('.form-row');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('.med-name').value.trim();
+                const dosage = row.querySelector('.med-dosage').value.trim();
+                const timing = row.querySelector('.med-timing').value.trim();
+                
+                if (name) {
+                    medications.push({ name, dosage, timing });
+                }
+            });
+
+            if (medications.length < 2) {
+                alert('Please add at least 2 medications to check interactions');
+                return;
+            }
+
+            // Show results section
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            // Show loading
+            const results = document.getElementById('interactionResults');
+            results.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
+                    <p style="margin-top: 20px;">Analyzing medication interactions...</p>
+                </div>
+            `;
+
+            // Simulate API call
+            setTimeout(() => {
+                const interactions = analyzeInteractions(medications);
+                displayResults(interactions, medications);
+            }, 2000);
+        }
+
+        function analyzeInteractions(medications) {
+            // Sample interaction database (replace with actual medical database)
+            const interactionDB = {
+                'Aspirin-Ibuprofen': {
+                    severity: 'danger',
+                    description: 'Increased risk of gastrointestinal bleeding when combined',
+                    mechanism: 'Both medications inhibit platelet aggregation and can irritate the stomach lining',
+                    recommendation: 'Avoid concurrent use. Consider alternative pain relievers or maintain at least 8 hours between doses.'
+                },
+                'Warfarin-Aspirin': {
+                    severity: 'danger',
+                    description: 'Significantly increased bleeding risk',
+                    mechanism: 'Both medications affect blood clotting through different mechanisms',
+                    recommendation: 'Avoid combination unless specifically prescribed by doctor with close monitoring'
+                },
+                'Metformin-Lisinopril': {
+                    severity: 'warning',
+                    description: 'May increase risk of hypoglycemia',
+                    mechanism: 'Lisinopril can enhance glucose-lowering effects',
+                    recommendation: 'Monitor blood sugar levels closely when starting this combination'
+                },
+                'Amoxicillin-Warfarin': {
+                    severity: 'warning',
+                    description: 'May increase warfarin effect and bleeding risk',
+                    mechanism: 'Antibiotics can alter gut flora affecting vitamin K production',
+                    recommendation: 'Monitor INR more frequently during antibiotic therapy'
+                }
+            };
+
+            const results = [];
+            
+            // Check each pair of medications
+            for (let i = 0; i < medications.length; i++) {
+                for (let j = i + 1; j < medications.length; j++) {
+                    const pair1 = `${medications[i].name}-${medications[j].name}`;
+                    const pair2 = `${medications[j].name}-${medications[i].name}`;
+                    
+                    const interaction = interactionDB[pair1] || interactionDB[pair2];
+                    
+                    if (interaction) {
+                        results.push({
+                            med1: medications[i].name,
+                            med2: medications[j].name,
+                            ...interaction
+                        });
+                    } else {
+                        results.push({
+                            med1: medications[i].name,
+                            med2: medications[j].name,
+                            severity: 'safe',
+                            description: 'No known significant interactions',
+                            mechanism: 'These medications are generally safe to take together',
+                            recommendation: 'Continue as prescribed, but always consult your doctor if you experience unusual symptoms'
+                        });
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        function displayResults(interactions, medications) {
+            const results = document.getElementById('interactionResults');
+            
+            let dangerCount = interactions.filter(i => i.severity === 'danger').length;
+            let warningCount = interactions.filter(i => i.severity === 'warning').length;
+            
+            let html = `
+                <div class="info-box">
+                    <strong><i class="fas fa-info-circle"></i> Summary:</strong>
+                    Found ${interactions.length} medication combinations:
+                    ${dangerCount > 0 ? `<span style="color: var(--danger);">${dangerCount} dangerous</span>` : ''}
+                    ${warningCount > 0 ? `<span style="color: #ffc107;">${warningCount} cautionary</span>` : ''}
+                    ${interactions.length - dangerCount - warningCount} safe combinations
+                </div>
+            `;
+
+            // Display each interaction
+            interactions.forEach(interaction => {
+                let severityClass = '';
+                let severityText = '';
+                
+                if (interaction.severity === 'danger') {
+                    severityClass = 'danger';
+                    severityText = 'Dangerous Interaction';
+                } else if (interaction.severity === 'warning') {
+                    severityClass = 'warning';
+                    severityText = 'Use with Caution';
+                } else {
+                    severityClass = 'safe';
+                    severityText = 'Safe Combination';
+                }
+
+                html += `
+                    <div class="interaction-card ${severityClass}">
+                        <div class="medication-pair">
+                            ${interaction.med1} + ${interaction.med2}
+                        </div>
+                        <span class="severity-badge ${severityClass}">${severityText}</span>
+                        <p><strong>Description:</strong> ${interaction.description}</p>
+                        <p><strong>Mechanism:</strong> ${interaction.mechanism}</p>
+                        <p><strong>Recommendation:</strong> ${interaction.recommendation}</p>
+                    </div>
+                `;
+            });
+
+            // Add timing recommendations
+            html += `
+                <div class="timeline-container">
+                    <h3><i class="fas fa-clock"></i> Recommended Medication Schedule</h3>
+                    <div class="timeline">
+            `;
+
+            // Sort medications by timing
+            const sortedMeds = [...medications].sort((a, b) => {
+                const timeA = a.timing ? new Date('1970/01/01 ' + a.timing) : new Date(0);
+                const timeB = b.timing ? new Date('1970/01/01 ' + b.timing) : new Date(0);
+                return timeA - timeB;
+            });
+
+            sortedMeds.forEach((med, index) => {
+                const hasDanger = interactions.some(i => 
+                    (i.med1 === med.name || i.med2 === med.name) && i.severity === 'danger'
+                );
+                
+                html += `
+                    <div class="timeline-item ${hasDanger ? 'warning' : ''}" style="left: ${index * (100 / (sortedMeds.length - 1))}%;">
+                        ${med.name}<br>
+                        <small>${med.timing || 'Anytime'}</small>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <p style="margin-top: 30px; font-size: 0.9rem; color: var(--gray);">
+                        <i class="fas fa-lightbulb"></i> Tip: Space out medications with dangerous interactions by at least 2-4 hours if recommended by your doctor.
+                    </p>
+                </div>
+            `;
+
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
