@@ -1,0 +1,16 @@
+Disease,Fever,Cough,Fatigue,Headache,RunnyNose,SoreThroat,Nausea,Diarrhea,ChestPain,ShortnessBreath,MusclePain,JointPain,AbdominalPain,Vomiting,Rash
+Common Cold,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0
+Flu,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0
+COVID-19,1,1,1,1,0,1,0,0,1,1,1,0,0,0,0
+Allergies,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0
+Migraine,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0
+Gastroenteritis,1,0,1,1,0,0,1,1,0,0,0,0,1,1,0
+Pneumonia,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0
+Bronchitis,0,1,1,0,0,1,0,0,1,1,0,0,0,0,0
+Strep Throat,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0
+Sinusitis,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0
+Asthma,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+Food Poisoning,1,0,1,0,0,0,1,1,0,0,0,0,1,1,0
+Mononucleosis,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0
+UTI,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Influenza,1,1,1,1,0,1,0,0,0,0,1,1,0,0,0

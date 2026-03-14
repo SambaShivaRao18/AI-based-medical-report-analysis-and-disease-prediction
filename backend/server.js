@@ -1,13 +1,9 @@
-// Add this with other requires
-const fileUpload = require('express-fileupload');
-
-
-// server.js
-const chatbotRoutes = require('./routes/chatbot');
+// backend/server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const fileUpload = require('express-fileupload');
 
 // Load environment variables
 dotenv.config();
@@ -17,6 +13,9 @@ const connectDB = require('./config/db');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const reportRoutes = require('./routes/reportAnalysis');
+const chatbotRoutes = require('./routes/chatbot');
+const symptomRoutes = require('./routes/symptoms');
 
 // Initialize express
 const app = express();
@@ -24,27 +23,30 @@ const app = express();
 // Connect to database
 connectDB();
 
-// Middleware
+// CORS configuration - THIS MUST COME BEFORE ROUTES
 app.use(cors({
-    origin: 'http://localhost:8000', // Your frontend URL
-    credentials: true
+    origin: ['http://localhost:8000', 'http://127.0.0.1:8000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
-// Add after other middleware
+// Handle preflight requests
+app.options('*', cors());
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload({
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
+    limits: { fileSize: 20 * 1024 * 1024 },
     abortOnLimit: true
 }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/chatbot', chatbotRoutes);
-
-// Add report analysis routes
-const reportRoutes = require('./routes/reportAnalysis');
 app.use('/api/reports', reportRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/symptoms', symptomRoutes);
 
 // Test route
 app.get('/', (req, res) => {

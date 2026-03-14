@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -214,11 +215,17 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-container">
@@ -245,9 +252,30 @@
             <!-- Left side - Symptom selection -->
             <div class="symptom-input-card">
                 <h2 style="margin-bottom: 20px;">Select Your Symptoms</h2>
-                
+
                 <div class="search-box">
                     <input type="text" id="symptomSearch" placeholder="Search symptoms...">
+                </div>
+
+                <!-- Custom Symptom Input -->
+                <div
+                    style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 1px dashed var(--primary);">
+                    <h3 style="margin-bottom: 10px; color: var(--secondary); font-size: 1.1rem;">
+                        <i class="fas fa-plus-circle" style="color: var(--primary);"></i> Add Custom Symptom
+                    </h3>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="customSymptomInput"
+                            placeholder="e.g., Loss of appetite, Sweating, Chills..."
+                            style="flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem;"
+                            onkeypress="handleCustomSymptomKeyPress(event)">
+                        <button onclick="addCustomSymptom()"
+                            style="padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <p style="margin-top: 8px; font-size: 0.85rem; color: var(--gray);">
+                        <i class="fas fa-info-circle"></i> Add any symptom not in the list above
+                    </p>
                 </div>
 
                 <div class="symptoms-grid" id="symptomsGrid">
@@ -264,14 +292,15 @@
 
                 <div class="disclaimer">
                     <i class="fas fa-info-circle"></i>
-                    This is for informational purposes only. Always consult with a healthcare professional for medical advice.
+                    This is for informational purposes only. Always consult with a healthcare professional for medical
+                    advice.
                 </div>
             </div>
 
             <!-- Right side - Results -->
             <div class="results-card" id="resultsCard">
                 <h2 style="margin-bottom: 20px;">Prediction Results</h2>
-                
+
                 <div id="resultsContent">
                     <div style="text-align: center; color: var(--gray); padding: 40px;">
                         <i class="fas fa-arrow-left" style="font-size: 3rem; opacity: 0.3;"></i>
@@ -284,8 +313,145 @@
 
     <script>
         // Sample symptoms list (expand this with real medical symptoms)
+        // Custom symptom handling
+        function handleCustomSymptomKeyPress(event) {
+            if (event.key === 'Enter') {
+                addCustomSymptom();
+            }
+        }
+
+        function addCustomSymptom() {
+            const input = document.getElementById('customSymptomInput');
+            const symptom = input.value.trim();
+
+            if (!symptom) {
+                showNotification('Please enter a symptom', 'error');
+                return;
+            }
+
+            // Check if symptom already exists in predefined list or already selected
+            const symptomExists = symptomsList.some(s => s.toLowerCase() === symptom.toLowerCase()) ||
+                selectedSymptoms.some(s => s.toLowerCase() === symptom.toLowerCase());
+
+            if (symptomExists) {
+                showNotification('This symptom already exists in the list', 'error');
+                input.value = '';
+                return;
+            }
+
+            // Add to selected symptoms
+            if (!selectedSymptoms.includes(symptom)) {
+                selectedSymptoms.push(symptom);
+                updateSelectedSymptoms();
+                updatePredictButton();
+
+                // Add to symptoms grid as a temporary tag
+                addCustomSymptomToGrid(symptom);
+
+                // Clear input
+                input.value = '';
+
+                showNotification(`Added "${symptom}" to your symptoms`, 'success');
+            }
+        }
+
+        function addCustomSymptomToGrid(symptom) {
+            const grid = document.getElementById('symptomsGrid');
+
+            // Check if a "Custom Symptoms" section exists, if not create it
+            let customSection = document.getElementById('customSymptomsSection');
+
+            if (!customSection) {
+                // Create section header
+                const header = document.createElement('div');
+                header.id = 'customSymptomsSection';
+                header.style.cssText = 'grid-column: 1 / -1; margin: 10px 0 5px; padding: 5px; background: #e2e8f0; border-radius: 5px; font-weight: bold; color: var(--secondary);';
+                header.innerHTML = '<i class="fas fa-star"></i> Custom Symptoms Added:';
+                grid.appendChild(header);
+            }
+
+            // Add custom symptom tag
+            const div = document.createElement('div');
+            div.className = 'symptom-tag custom-symptom selected';
+            div.textContent = symptom;
+            div.style.background = 'var(--primary)';
+            div.style.color = 'white';
+            div.style.borderColor = 'var(--primary-dark)';
+            div.onclick = () => toggleSymptom(symptom, div);
+
+            grid.appendChild(div);
+        }
+
+        // Override the toggleSymptom function to handle custom symptoms
+        function toggleSymptom(symptom, element) {
+            const index = selectedSymptoms.indexOf(symptom);
+
+            if (index === -1) {
+                selectedSymptoms.push(symptom);
+                element.classList.add('selected');
+            } else {
+                selectedSymptoms.splice(index, 1);
+                element.classList.remove('selected');
+
+                // If it's a custom symptom and not selected, remove from grid
+                if (element.classList.contains('custom-symptom') && !element.classList.contains('selected')) {
+                    element.remove();
+
+                    // Check if there are no more custom symptoms, remove the section header
+                    const customSymptoms = document.querySelectorAll('.custom-symptom');
+                    if (customSymptoms.length === 0) {
+                        const customSection = document.getElementById('customSymptomsSection');
+                        if (customSection) {
+                            customSection.remove();
+                        }
+                    }
+                }
+            }
+
+            updateSelectedSymptoms();
+            updatePredictButton();
+        }
+
+        // Notification function
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${type === 'error' ? '#f44336' : '#4caf50'};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+            notification.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+        document.head.appendChild(style);
         const symptomsList = [
-            'Fever', 'Cough', 'Headache', 'Fatigue', 'Nausea', 
+            'Fever', 'Cough', 'Headache', 'Fatigue', 'Nausea',
             'Dizziness', 'Chest Pain', 'Shortness of Breath', 'Sore Throat',
             'Runny Nose', 'Muscle Pain', 'Joint Pain', 'Back Pain',
             'Abdominal Pain', 'Vomiting', 'Diarrhea', 'Constipation',
@@ -314,7 +480,7 @@
         document.getElementById('symptomSearch').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const symptoms = document.querySelectorAll('.symptom-tag');
-            
+
             symptoms.forEach(symptom => {
                 const text = symptom.textContent.toLowerCase();
                 if (text.includes(searchTerm)) {
@@ -328,7 +494,7 @@
         // Toggle symptom selection
         function toggleSymptom(symptom, element) {
             const index = selectedSymptoms.indexOf(symptom);
-            
+
             if (index === -1) {
                 selectedSymptoms.push(symptom);
                 element.classList.add('selected');
@@ -336,7 +502,7 @@
                 selectedSymptoms.splice(index, 1);
                 element.classList.remove('selected');
             }
-            
+
             updateSelectedSymptoms();
             updatePredictButton();
         }
@@ -345,7 +511,7 @@
         function updateSelectedSymptoms() {
             const container = document.getElementById('selectedSymptoms');
             container.innerHTML = '';
-            
+
             selectedSymptoms.forEach(symptom => {
                 const tag = document.createElement('span');
                 tag.className = 'selected-symptom';
@@ -359,7 +525,7 @@
             const index = selectedSymptoms.indexOf(symptom);
             if (index > -1) {
                 selectedSymptoms.splice(index, 1);
-                
+
                 // Update grid
                 const symptoms = document.querySelectorAll('.symptom-tag');
                 symptoms.forEach(s => {
@@ -367,7 +533,7 @@
                         s.classList.remove('selected');
                     }
                 });
-                
+
                 updateSelectedSymptoms();
                 updatePredictButton();
             }
@@ -380,29 +546,90 @@
         }
 
         // Predict disease
-        function predictDisease() {
+        // Predict disease - REAL ML MODEL
+        // Predict disease - REAL API CALL with debugging
+        async function predictDisease() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            console.log('🔍 Debug - Token:', token ? 'Exists' : 'Missing');
+            console.log('🔍 Debug - User:', user);
+            console.log('🔍 Debug - Selected symptoms:', selectedSymptoms);
+
+            if (!token || !user) {
+                showNotification('Please login to use this feature', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
+
+            if (selectedSymptoms.length < 2) {
+                showNotification('Please select at least 2 symptoms', 'error');
+                return;
+            }
+
             const resultsContent = document.getElementById('resultsContent');
-            
+
             // Show loading
             resultsContent.innerHTML = `
-                <div class="loading">
-                    <i class="fas fa-circle-notch"></i>
-                    <p style="margin-top: 20px;">Analyzing symptoms...</p>
+        <div class="loading">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <p style="margin-top: 20px;">AI is analyzing your symptoms...</p>
+        </div>
+    `;
+
+            try {
+                console.log('📤 Sending to:', 'http://127.0.0.1:5000/api/symptoms/predict');
+                console.log('📤 Payload:', { symptoms: selectedSymptoms });
+
+                const response = await fetch('http://127.0.0.1:5000/api/symptoms/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        symptoms: selectedSymptoms
+                    })
+                });
+
+                console.log('📥 Response status:', response.status);
+
+                const data = await response.json();
+                console.log('📥 Response data:', data);
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    resultsContent.innerHTML = `
+                <div style="text-align: center; color: var(--danger); padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                    <p style="margin-top: 20px;">${data.error || 'Prediction failed'}</p>
                 </div>
             `;
+                }
+            } catch (error) {
+                console.error('❌ Fetch error:', error);
+                console.error('❌ Error name:', error.name);
+                console.error('❌ Error message:', error.message);
 
-            // Simulate API call
-            setTimeout(() => {
-                const predictions = generatePredictions(selectedSymptoms);
-                displayResults(predictions);
-            }, 2000);
+                resultsContent.innerHTML = `
+            <div style="text-align: center; color: var(--danger); padding: 40px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                <p style="margin-top: 20px;">Network error. Please check if servers are running.</p>
+                <p style="font-size: 0.9rem; margin-top: 10px; background: #fee; padding: 10px; border-radius: 5px;">
+                    <strong>Debug info:</strong> ${error.message}
+                </p>
+            </div>
+        `;
+            }
         }
-
         // Generate sample predictions (replace with actual AI model)
         function generatePredictions(symptoms) {
             // This is sample logic - replace with actual ML model
             const predictions = [];
-            
+
             const diseaseDatabase = {
                 'Common Cold': { symptoms: ['Fever', 'Cough', 'Runny Nose', 'Sore Throat'], probability: 0 },
                 'Flu': { symptoms: ['Fever', 'Cough', 'Fatigue', 'Muscle Pain', 'Headache'], probability: 0 },
@@ -418,7 +645,7 @@
             for (const [disease, data] of Object.entries(diseaseDatabase)) {
                 const matchingSymptoms = symptoms.filter(s => data.symptoms.includes(s));
                 const probability = (matchingSymptoms.length / data.symptoms.length) * 100;
-                
+
                 if (matchingSymptoms.length > 0) {
                     predictions.push({
                         name: disease,
@@ -434,50 +661,81 @@
         }
 
         // Display results
-        function displayResults(predictions) {
+        // Display results from API
+        // Display results from API
+        function displayResults(data) {
             const resultsContent = document.getElementById('resultsContent');
-            
-            if (predictions.length === 0) {
+            const predictions = data.predictions;
+            const usedFallback = data.used_fallback;
+            const unknownSymptoms = data.unknown_symptoms;
+
+            if (!predictions || predictions.length === 0) {
                 resultsContent.innerHTML = `
-                    <div style="text-align: center; color: var(--gray); padding: 40px;">
-                        <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3;"></i>
-                        <p style="margin-top: 20px;">No matching conditions found</p>
-                    </div>
-                `;
+            <div style="text-align: center; color: var(--gray); padding: 40px;">
+                <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p style="margin-top: 20px;">No matching conditions found</p>
+            </div>
+        `;
                 return;
             }
 
             let html = '';
+
+            // Show info about fallback if used
+            if (usedFallback) {
+                html += `
+            <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 5px;">
+                <i class="fas fa-robot" style="color: #1976d2;"></i>
+                <strong style="color: #1976d2;"> AI-Powered Analysis:</strong>
+                <span style="color: #1976d2;"> Using advanced AI for symptoms not in our database</span>
+            </div>
+        `;
+            }
+
+            // Show unknown symptoms warning if any
+            if (unknownSymptoms && unknownSymptoms.length > 0) {
+                html += `
+            <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+                <i class="fas fa-info-circle" style="color: #856404;"></i>
+                <strong style="color: #856404;">Note:</strong>
+                <span style="color: #856404;"> The following symptoms were analyzed by AI: ${unknownSymptoms.join(', ')}</span>
+            </div>
+        `;
+            }
+
             predictions.forEach(pred => {
                 html += `
-                    <div class="disease-card">
-                        <div class="disease-name">${pred.name}</div>
-                        <div class="confidence-text">Match Probability: ${pred.probability}%</div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" style="width: ${pred.probability}%"></div>
-                        </div>
-                        <div class="symptoms-matched">
-                            ${pred.matchedSymptoms.map(s => `<span class="matched-symptom">${s}</span>`).join('')}
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--gray);">
-                            Matched ${pred.matchedSymptoms.length} of ${pred.totalSymptoms} typical symptoms
-                        </div>
+            <div class="disease-card">
+                <div class="disease-name">${pred.name}</div>
+                <div class="confidence-text">Match Probability: ${pred.probability}%</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: ${pred.probability}%"></div>
+                </div>
+                <p style="margin: 10px 0; color: var(--secondary);">${pred.description || ''}</p>
+                ${pred.recommendations ? `
+                    <div style="margin-top: 15px;">
+                        <strong>Recommendations:</strong>
+                        <ul style="margin-top: 5px; margin-left: 20px;">
+                            ${pred.recommendations.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
                     </div>
-                `;
+                ` : ''}
+            </div>
+        `;
             });
 
             html += `
-                <div class="disclaimer">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    These predictions are based on symptom matching and should not replace professional medical diagnosis.
-                </div>
-            `;
+        <div class="disclaimer">
+            <i class="fas fa-exclamation-triangle"></i>
+            These predictions are AI-generated and should not replace professional medical diagnosis. Always consult with a healthcare provider.
+        </div>
+    `;
 
             resultsContent.innerHTML = html;
         }
-
         // Initialize on page load
         initializeSymptoms();
     </script>
 </body>
+
 </html>
