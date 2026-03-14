@@ -3,6 +3,7 @@ const fileUpload = require('express-fileupload');
 
 
 // server.js
+const chatbotRoutes = require('./routes/chatbot');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -39,6 +40,7 @@ app.use(fileUpload({
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Add report analysis routes
 const reportRoutes = require('./routes/reportAnalysis');

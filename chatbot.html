@@ -41,6 +41,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 30px;
+            background: #f8fafc;
         }
 
         .message {
@@ -62,12 +63,14 @@
             padding: 15px 20px;
             border-radius: 20px;
             position: relative;
+            line-height: 1.5;
         }
 
         .bot .message-content {
-            background: #f0f0f0;
+            background: white;
             color: var(--dark);
             border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .user .message-content {
@@ -93,7 +96,7 @@
         .chat-input {
             flex: 1;
             padding: 15px;
-            border: 2px solid #eee;
+            border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s;
@@ -118,13 +121,14 @@
             justify-content: center;
         }
 
-        .send-btn:hover {
+        .send-btn:hover:not(:disabled) {
             background: var(--primary-dark);
             transform: scale(1.1);
         }
 
-        .send-btn i {
-            font-size: 1.2rem;
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .quick-actions {
@@ -135,13 +139,14 @@
         }
 
         .quick-action {
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border: 1px solid #eee;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 0.9rem;
+            color: var(--secondary);
         }
 
         .quick-action:hover {
@@ -154,9 +159,10 @@
             display: flex;
             gap: 5px;
             padding: 15px 20px;
-            background: #f0f0f0;
+            background: white;
             border-radius: 20px;
             width: fit-content;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .typing-indicator span {
@@ -184,20 +190,67 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .error-message {
+            background: #fee;
+            color: var(--danger);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 10px 20px;
+            text-align: center;
+        }
+
+        .chat-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chat-info i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .chat-info span {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .model-badge {
+            background: var(--primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .quick-actions {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <i class="fas fa-heartbeat"></i>
                 <span>MediAnalyze</span>
-            </div>
+            </a>
             <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="profile.html">Profile</a></li>
-                <li><a href="index.html" class="btn-outline">Logout</a></li>
+                <li><a href="#" id="logoutBtn" class="btn-outline">Logout</a></li>
             </ul>
         </div>
     </nav>
@@ -205,40 +258,68 @@
     <div class="chatbot-container">
         <div class="chat-header">
             <h1><i class="fas fa-robot" style="color: var(--primary);"></i> Health Assistant Chatbot</h1>
-            <p>Ask me anything about your health, diet, medications, or wellness tips!</p>
+            <p>Ask me anything about medications, symptoms, diet, or general health advice</p>
         </div>
 
-        <div class="chat-main">
-            <div class="chat-messages" id="chatMessages">
-                <!-- Welcome message -->
-                <div class="message bot">
-                    <div class="message-content">
-                        👋 Hello! I'm your AI health assistant. How can I help you today?
-                        <div class="message-time">Just now</div>
+        <div id="loginCheck" style="display: none;" class="error-message">
+            Please <a href="login.html" style="color: var(--primary);">login</a> to use the chatbot.
+        </div>
+
+        <div id="mainContent">
+            <div class="chat-main">
+                <div class="chat-info">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Health Assistant</span>
+                    <span class="model-badge" id="modelBadge">Medical RAG</span>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome message -->
+                    <div class="message bot">
+                        <div class="message-content">
+                            👋 Hello! I'm your AI health assistant. I can help you with:
+                            <ul style="margin-top: 8px; margin-left: 20px;">
+                                <li>Medication information</li>
+                                <li>Symptom explanations</li>
+                                <li>Diet recommendations</li>
+                                <li>General health tips</li>
+                            </ul>
+                            <div class="message-time">Just now</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="quick-actions">
-                <span class="quick-action" data-query="What are healthy eating tips?">🥗 Healthy eating</span>
-                <span class="quick-action" data-query="Give me a daily routine for good health">📅 Daily routine</span>
-                <span class="quick-action" data-query="Tips for better sleep">😴 Sleep tips</span>
-                <span class="quick-action" data-query="Exercise recommendations">🏃‍♂️ Exercise</span>
-                <span class="quick-action" data-query="How to reduce stress?">🧘 Stress relief</span>
-            </div>
+                <div class="quick-actions">
+                    <span class="quick-action" data-query="What are common side effects of antibiotics?">💊 Antibiotics</span>
+                    <span class="quick-action" data-query="Foods to avoid with high blood pressure">🥗 Hypertension diet</span>
+                    <span class="quick-action" data-query="Explain what HbA1c means">📊 HbA1c explained</span>
+                    <span class="quick-action" data-query="Symptoms of vitamin D deficiency">☀️ Vitamin D</span>
+                    <span class="quick-action" data-query="When to take thyroid medication">🦋 Thyroid meds</span>
+                </div>
 
-            <div class="chat-input-area">
-                <input type="text" class="chat-input" id="userInput" placeholder="Type your health question..." onkeypress="handleKeyPress(event)">
-                <button class="send-btn" onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="userInput" placeholder="Type your health question..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!token || !user) {
+            document.getElementById('loginCheck').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
 
         // Quick action clicks
         document.querySelectorAll('.quick-action').forEach(action => {
@@ -255,7 +336,7 @@
             }
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
 
@@ -263,15 +344,46 @@
             addMessage(message, 'user');
             userInput.value = '';
 
+            // Disable input while waiting
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
             // Show typing indicator
             showTypingIndicator();
 
-            // Simulate AI response (replace with actual API call)
-            setTimeout(() => {
+            try {
+                const response = await fetch('http://localhost:5000/api/chatbot/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        userId: user.id 
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
                 removeTypingIndicator();
-                const response = generateResponse(message);
-                addMessage(response, 'bot');
-            }, 1500);
+
+                if (data.success) {
+                    addMessage(data.response, 'bot');
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    console.error('Chatbot error:', data.error);
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('Network error. Please check your connection.', 'bot');
+                console.error('Error:', error);
+            } finally {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
         }
 
         function addMessage(text, sender) {
@@ -280,9 +392,18 @@
             
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
+            // Format bot responses with better styling
+            let formattedText = text;
+            if (sender === 'bot') {
+                // Convert URLs to links
+                formattedText = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+                // Convert line breaks to <br>
+                formattedText = formattedText.replace(/\n/g, '<br>');
+            }
+            
             messageDiv.innerHTML = `
                 <div class="message-content">
-                    ${text}
+                    ${formattedText}
                     <div class="message-time">${time}</div>
                 </div>
             `;
@@ -313,38 +434,15 @@
             }
         }
 
-        function generateResponse(query) {
-            // Sample responses (replace with actual AI responses)
-            const responses = {
-                'healthy eating': '🥗 Here are some healthy eating tips:\n• Eat a variety of colorful fruits and vegetables\n• Include lean proteins like fish, chicken, and legumes\n• Choose whole grains over refined carbs\n• Stay hydrated with water (8-10 glasses daily)\n• Limit processed foods and added sugars',
-                
-                'daily routine': '📅 Here\'s a healthy daily routine:\n• 7:00 AM: Wake up, drink water\n• 8:00 AM: Healthy breakfast\n• 10:00 AM: Short stretching break\n• 12:30 PM: Nutritious lunch\n• 3:00 PM: Light snack\n• 6:00 PM: 30-min exercise\n• 8:00 PM: Light dinner\n• 10:30 PM: Wind down\n• 11:00 PM: Sleep',
-                
-                'sleep': '😴 Tips for better sleep:\n• Maintain consistent sleep schedule\n• Avoid screens 1 hour before bed\n• Create dark, cool sleeping environment\n• Limit caffeine after 2 PM\n• Try relaxation techniques\n• Avoid heavy meals before bedtime',
-                
-                'exercise': '🏃‍♂️ Exercise recommendations:\n• 150 mins moderate aerobic activity weekly\n• Strength training 2x per week\n• Include flexibility exercises\n• Start slowly if new to exercise\n• Listen to your body\n• Stay hydrated during workouts',
-                
-                'stress': '🧘 Stress management tips:\n• Practice deep breathing exercises\n• Take regular breaks during work\n• Engage in hobbies you enjoy\n• Connect with friends and family\n• Consider meditation or yoga\n• Get adequate sleep',
-                
-                'default': 'I understand you\'re asking about health. Could you please provide more specific details so I can give you a more helpful response? For example, you can ask about diet tips, exercise routines, sleep advice, or stress management.'
-            };
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = 'index.html';
+        });
 
-            // Simple keyword matching
-            const lowercaseQuery = query.toLowerCase();
-            if (lowercaseQuery.includes('eat') || lowercaseQuery.includes('diet') || lowercaseQuery.includes('food')) {
-                return responses['healthy eating'];
-            } else if (lowercaseQuery.includes('routine') || lowercaseQuery.includes('schedule')) {
-                return responses['daily routine'];
-            } else if (lowercaseQuery.includes('sleep') || lowercaseQuery.includes('insomnia')) {
-                return responses['sleep'];
-            } else if (lowercaseQuery.includes('exercise') || lowercaseQuery.includes('workout') || lowercaseQuery.includes('fitness')) {
-                return responses['exercise'];
-            } else if (lowercaseQuery.includes('stress') || lowercaseQuery.includes('anxiety') || lowercaseQuery.includes('relax')) {
-                return responses['stress'];
-            } else {
-                return responses['default'];
-            }
-        }
+        // Focus input on load
+        userInput.focus();
     </script>
 </body>
 </html>
