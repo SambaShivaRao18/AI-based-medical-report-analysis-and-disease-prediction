@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -227,6 +228,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-container">
@@ -251,7 +253,7 @@
 
         <div class="medication-form" id="medicationForm">
             <h3 style="margin-bottom: 20px;">Add Your Medications</h3>
-            
+
             <div id="medicationsList">
                 <!-- Medication rows will be added here -->
                 <div class="form-row" id="medRow1">
@@ -277,7 +279,7 @@
 
         <div class="results-section" id="resultsSection">
             <h2 style="margin-bottom: 20px;">Interaction Analysis Results</h2>
-            
+
             <div id="interactionResults">
                 <!-- Results will be displayed here -->
             </div>
@@ -340,15 +342,24 @@
             }
         }
 
-        function checkInteractions() {
+        async function checkInteractions() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!token || !user) {
+                alert('Please login to use this feature');
+                window.location.href = 'login.html';
+                return;
+            }
+
             const medications = [];
             const rows = document.querySelectorAll('.form-row');
-            
+
             rows.forEach(row => {
                 const name = row.querySelector('.med-name').value.trim();
                 const dosage = row.querySelector('.med-dosage').value.trim();
                 const timing = row.querySelector('.med-timing').value.trim();
-                
+
                 if (name) {
                     medications.push({ name, dosage, timing });
                 }
@@ -362,21 +373,47 @@
             // Show results section
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.style.display = 'block';
-            
+
             // Show loading
             const results = document.getElementById('interactionResults');
             results.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
-                    <p style="margin-top: 20px;">Analyzing medication interactions...</p>
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
+            <p style="margin-top: 20px;">AI analyzing medication interactions...</p>
+        </div>
+    `;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/drugs/interactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ medications })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.interactions, medications, data.statistics, data.used_fallback, data.unknown_drugs);
+                } else {
+                    results.innerHTML = `
+                <div style="text-align: center; color: var(--danger); padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                    <p style="margin-top: 20px;">${data.error || 'Analysis failed'}</p>
                 </div>
             `;
-
-            // Simulate API call
-            setTimeout(() => {
-                const interactions = analyzeInteractions(medications);
-                displayResults(interactions, medications);
-            }, 2000);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                results.innerHTML = `
+            <div style="text-align: center; color: var(--danger); padding: 40px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                <p style="margin-top: 20px;">Network error. Please check if servers are running.</p>
+            </div>
+        `;
+            }
         }
 
         function analyzeInteractions(medications) {
@@ -409,15 +446,15 @@
             };
 
             const results = [];
-            
+
             // Check each pair of medications
             for (let i = 0; i < medications.length; i++) {
                 for (let j = i + 1; j < medications.length; j++) {
                     const pair1 = `${medications[i].name}-${medications[j].name}`;
                     const pair2 = `${medications[j].name}-${medications[i].name}`;
-                    
+
                     const interaction = interactionDB[pair1] || interactionDB[pair2];
-                    
+
                     if (interaction) {
                         results.push({
                             med1: medications[i].name,
@@ -440,88 +477,151 @@
             return results;
         }
 
-        function displayResults(interactions, medications) {
+        function displayResults(interactions, medications, statistics, usedFallback, unknownDrugs) {
             const results = document.getElementById('interactionResults');
-            
-            let dangerCount = interactions.filter(i => i.severity === 'danger').length;
-            let warningCount = interactions.filter(i => i.severity === 'warning').length;
-            
-            let html = `
-                <div class="info-box">
-                    <strong><i class="fas fa-info-circle"></i> Summary:</strong>
-                    Found ${interactions.length} medication combinations:
-                    ${dangerCount > 0 ? `<span style="color: var(--danger);">${dangerCount} dangerous</span>` : ''}
-                    ${warningCount > 0 ? `<span style="color: #ffc107;">${warningCount} cautionary</span>` : ''}
-                    ${interactions.length - dangerCount - warningCount} safe combinations
+            let html = '';
+
+            // Summary Statistics
+            html += `
+        <div class="info-box" style="margin-bottom: 25px;">
+            <h3 style="margin-bottom: 10px;"><i class="fas fa-chart-pie"></i> Summary</h3>
+            <p>Found <strong>${statistics.total}</strong> medication combinations</p>
+            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                ${statistics.danger > 0 ? `<span style="background: var(--danger); color: white; padding: 5px 15px; border-radius: 50px;">🔴 ${statistics.danger} Dangerous</span>` : ''}
+                ${statistics.warning > 0 ? `<span style="background: #ffc107; color: var(--dark); padding: 5px 15px; border-radius: 50px;">🟡 ${statistics.warning} Cautionary</span>` : ''}
+                ${statistics.safe > 0 ? `<span style="background: #4caf50; color: white; padding: 5px 15px; border-radius: 50px;">🟢 ${statistics.safe} Safe</span>` : ''}
+            </div>
+        </div>
+    `;
+
+            // Process each interaction
+            interactions.forEach(interaction => {
+                const severityClass = interaction.severity;
+                const severityIcon = interaction.severity === 'danger' ? '🔴' :
+                    interaction.severity === 'warning' ? '🟡' : '🟢';
+
+                const severityTitle = interaction.severity === 'danger' ? 'Dangerous Interaction' :
+                    interaction.severity === 'warning' ? 'Use with Caution' : 'Safe Combination';
+
+                // Format timing recommendation
+                let timingAdvice = '';
+                if (interaction.hours_gap) {
+                    const gapStatus = interaction.hours_gap >= 8 ? '✅ Adequate gap' :
+                        interaction.hours_gap >= 4 ? '⚠️ Moderate gap' : '❌ Insufficient gap';
+
+                    timingAdvice = `
+                <div style="margin: 15px 0; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                    <strong><i class="fas fa-clock"></i> Timing Analysis:</strong>
+                    <p>Current gap: ${interaction.hours_gap} hours between doses (${gapStatus})</p>
+                    <p style="color: var(--secondary); margin-top: 5px;">${interaction.timing_recommendation || 'Maintain at least 4-8 hours gap between these medications.'}</p>
                 </div>
             `;
-
-            // Display each interaction
-            interactions.forEach(interaction => {
-                let severityClass = '';
-                let severityText = '';
-                
-                if (interaction.severity === 'danger') {
-                    severityClass = 'danger';
-                    severityText = 'Dangerous Interaction';
-                } else if (interaction.severity === 'warning') {
-                    severityClass = 'warning';
-                    severityText = 'Use with Caution';
-                } else {
-                    severityClass = 'safe';
-                    severityText = 'Safe Combination';
                 }
 
+                // Dosage recommendations
+                const dosageAdvice = `
+            <div style="margin: 15px 0; padding: 12px; background: #f0f7ff; border-radius: 8px;">
+                <strong><i class="fas fa-capsules"></i> Dosage Recommendations:</strong>
+                <ul style="margin-top: 8px; margin-left: 20px;">
+                    <li>${interaction.med1}: Take as prescribed ${interaction.dosage1 ? `(${interaction.dosage1})` : ''}</li>
+                    <li>${interaction.med2}: Take as prescribed ${interaction.dosage2 ? `(${interaction.dosage2})` : ''}</li>
+                    ${interaction.severity === 'danger' ? '<li style="color: var(--danger);">⚠️ Consider consulting doctor for dosage adjustment</li>' : ''}
+                </ul>
+            </div>
+        `;
+
+                // Safety monitoring advice
+                const safetyAdvice = `
+            <div style="margin: 15px 0; padding: 12px; background: #fff1e6; border-radius: 8px;">
+                <strong><i class="fas fa-shield-alt"></i> What to Watch For:</strong>
+                <p style="margin-top: 8px;">${interaction.monitoring_advice || 'Watch for unusual symptoms and report to your doctor.'}</p>
+            </div>
+        `;
+
+                // Alternative suggestions
+                const alternativeAdvice = interaction.alternatives ? `
+            <div style="margin: 15px 0; padding: 12px; background: #e8f5e9; border-radius: 8px;">
+                <strong><i class="fas fa-exchange-alt"></i> Alternatives to Discuss with Doctor:</strong>
+                <p style="margin-top: 8px;">${interaction.alternatives}</p>
+            </div>
+        ` : '';
+
+                // Build the complete card
                 html += `
-                    <div class="interaction-card ${severityClass}">
-                        <div class="medication-pair">
-                            ${interaction.med1} + ${interaction.med2}
-                        </div>
-                        <span class="severity-badge ${severityClass}">${severityText}</span>
-                        <p><strong>Description:</strong> ${interaction.description}</p>
-                        <p><strong>Mechanism:</strong> ${interaction.mechanism}</p>
-                        <p><strong>Recommendation:</strong> ${interaction.recommendation}</p>
+            <div class="interaction-card ${severityClass}" style="margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <div class="medication-pair" style="font-size: 1.3rem;">
+                        ${severityIcon} ${interaction.med1} + ${interaction.med2}
                     </div>
-                `;
-            });
-
-            // Add timing recommendations
-            html += `
-                <div class="timeline-container">
-                    <h3><i class="fas fa-clock"></i> Recommended Medication Schedule</h3>
-                    <div class="timeline">
-            `;
-
-            // Sort medications by timing
-            const sortedMeds = [...medications].sort((a, b) => {
-                const timeA = a.timing ? new Date('1970/01/01 ' + a.timing) : new Date(0);
-                const timeB = b.timing ? new Date('1970/01/01 ' + b.timing) : new Date(0);
-                return timeA - timeB;
-            });
-
-            sortedMeds.forEach((med, index) => {
-                const hasDanger = interactions.some(i => 
-                    (i.med1 === med.name || i.med2 === med.name) && i.severity === 'danger'
-                );
+                    <span class="severity-badge ${severityClass}" style="font-size: 1rem; padding: 8px 20px;">
+                        ${severityTitle}
+                    </span>
+                </div>
                 
-                html += `
-                    <div class="timeline-item ${hasDanger ? 'warning' : ''}" style="left: ${index * (100 / (sortedMeds.length - 1))}%;">
-                        ${med.name}<br>
-                        <small>${med.timing || 'Anytime'}</small>
-                    </div>
-                `;
-            });
-
-            html += `
-                    </div>
-                    <p style="margin-top: 30px; font-size: 0.9rem; color: var(--gray);">
-                        <i class="fas fa-lightbulb"></i> Tip: Space out medications with dangerous interactions by at least 2-4 hours if recommended by your doctor.
+                <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <p style="font-size: 1rem; line-height: 1.6; color: var(--dark);">
+                        <strong>Description:</strong> ${interaction.description}
+                    </p>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--gray); margin-top: 10px;">
+                        <strong>Mechanism:</strong> ${interaction.mechanism}
                     </p>
                 </div>
-            `;
+
+                ${dosageAdvice}
+                ${timingAdvice}
+                ${safetyAdvice}
+                ${alternativeAdvice}
+
+                <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.85rem; color: var(--gray);">
+                    <i class="fas fa-info-circle"></i> 
+                    Analysis based on medical database
+                    ${interaction.hours_gap ? ` | ${interaction.hours_gap} hours between doses` : ''}
+                </div>
+            </div>
+        `;
+            });
+
+            // Add medication schedule timeline
+            const medsWithTiming = medications.filter(med => med.timing && med.timing.trim() !== '');
+            if (medsWithTiming.length >= 2) {
+                const sortedMeds = [...medsWithTiming].sort((a, b) => {
+                    const timeA = a.timing ? new Date('1970-01-01T' + a.timing.replace(' ', '')).getTime() : 0;
+                    const timeB = b.timing ? new Date('1970-01-01T' + b.timing.replace(' ', '')).getTime() : 0;
+                    return timeA - timeB;
+                });
+
+                html += `
+            <div class="timeline-container">
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-alt"></i> Your Medication Schedule</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0; position: relative;">
+                    <div style="position: absolute; top: 50%; left: 5%; right: 5%; height: 2px; background: #ddd; z-index: 1;"></div>
+                    ${sortedMeds.map(med => `
+                        <div style="position: relative; z-index: 2; background: white; padding: 10px 20px; border-radius: 50px; 
+                            border: 2px solid ${interactions.some(i => i.severity === 'danger' && (i.med1 === med.name || i.med2 === med.name)) ? 'var(--danger)' : 'var(--primary)'}; 
+                            text-align: center; min-width: 120px;">
+                            <strong>${med.name}</strong><br>
+                            <small>${med.timing}</small>
+                            ${med.dosage ? `<br><small style="color: var(--gray);">${med.dosage}</small>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="margin-top: 25px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                    <strong><i class="fas fa-lightbulb"></i> Schedule Tips:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Take medications at the same time each day</li>
+                        <li>Use pill organizer to avoid missed doses</li>
+                        <li>Set phone reminders for each medication</li>
+                        <li>Keep a medication diary to track effects</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+            }
 
             results.innerHTML = html;
         }
     </script>
 </body>
+
 </html>

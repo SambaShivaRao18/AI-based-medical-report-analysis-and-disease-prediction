@@ -10,6 +10,7 @@ dotenv.config();
 
 // Import database connection
 const connectDB = require('./config/db');
+const drugRoutes = require('./routes/drugs');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -43,6 +44,7 @@ app.use(fileUpload({
 }));
 
 // Routes
+app.use('/api/drugs', drugRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/chatbot', chatbotRoutes);

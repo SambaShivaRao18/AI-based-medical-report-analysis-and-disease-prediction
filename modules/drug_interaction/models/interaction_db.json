@@ -1,0 +1,192 @@
+{
+  "Ibuprofen-danger": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Increased risk of gastrointestinal bleeding",
+    "description": "Both medications inhibit COX enzymes and platelet aggregation",
+    "mechanism": "AVOID this combination if possible. If unavoidable under doctor supervision",
+    "recommendation": " use lowest effective doses.",
+    "spacing_effectiveness": "low",
+    "alternatives": "Use acetaminophen (Tylenol) for pain relief instead of ibuprofen",
+    "monitoring_advice": "Watch for black/tarry stools, coffee ground vomit, easy bruising"
+  },
+  "Warfarin-danger": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Increased bleeding risk",
+    "description": "NSAIDs increase bleeding risk and can cause gastric ulcers",
+    "mechanism": "AVOID this combination. Use acetaminophen for pain instead.",
+    "recommendation": "low",
+    "spacing_effectiveness": "Acetaminophen is safer for pain relief",
+    "alternatives": "Monitor for bleeding; consider PPI for stomach protection",
+    "monitoring_advice": NaN
+  },
+  "Lisinopril-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "May increase risk of hypoglycemia",
+    "description": "Lisinopril can enhance glucose-lowering effects",
+    "mechanism": "Monitor blood sugar levels closely when starting this combination.",
+    "recommendation": "medium",
+    "spacing_effectiveness": "Alternative BP meds may have less effect on glucose",
+    "alternatives": "Check blood sugar more frequently, especially after meals",
+    "monitoring_advice": NaN
+  },
+  "Warfarin-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Altered anticoagulant effect",
+    "description": "Phenytoin induces CYP enzymes affecting warfarin metabolism",
+    "mechanism": "Monitor INR closely when starting/stopping phenytoin.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Alternative anticonvulsants may have less interaction",
+    "alternatives": "Check INR weekly when changing doses",
+    "monitoring_advice": NaN
+  },
+  "Amiodarone-danger": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Increased risk of muscle damage (rhabdomyolysis)",
+    "description": "Amiodarone inhibits CYP3A4 enzyme increasing statin levels",
+    "mechanism": "AVOID this combination. Use alternative statin (pravastatin/rosuvastatin).",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Pravastatin or rosuvastatin are safer alternatives",
+    "alternatives": "Monitor for muscle pain, weakness; check CK levels",
+    "monitoring_advice": NaN
+  },
+  "Nitroglycerin-danger": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Severe hypotension and cardiovascular collapse",
+    "description": "Both are vasodilators causing synergistic blood pressure drop",
+    "mechanism": "ABSOLUTE CONTRAINDICATION - do not use within 24-48 hours.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "For ED: tadalafil also contraindicated; discuss non-nitrate options",
+    "alternatives": "Seek emergency care if chest pain occurs after taking",
+    "monitoring_advice": NaN
+  },
+  "Calcium-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Reduced thyroid hormone absorption",
+    "description": "Calcium binds to levothyroxine in the gut",
+    "mechanism": "Separate doses by at least 4 hours.",
+    "recommendation": "high",
+    "spacing_effectiveness": "Take calcium at bedtime if levothyroxine is morning",
+    "alternatives": "Check TSH levels 6-8 weeks after changing schedule",
+    "monitoring_advice": NaN
+  },
+  "Furosemide-warning": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Increased risk of digoxin toxicity",
+    "description": "Diuretic-induced hypokalemia increases digoxin sensitivity",
+    "mechanism": "Monitor potassium levels and digoxin levels.",
+    "recommendation": "medium",
+    "spacing_effectiveness": "Consider potassium-sparing diuretics",
+    "alternatives": "Check potassium and digoxin levels regularly",
+    "monitoring_advice": NaN
+  },
+  "Omeprazole-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Reduced antiplatelet effect",
+    "description": "Omeprazole inhibits CYP2C19 needed to activate clopidogrel",
+    "mechanism": "Consider alternative PPI (pantoprazole) or H2 blocker.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Pantoprazole, famotidine, or ranitidine have less interaction",
+    "alternatives": "Monitor for cardiovascular events; consider platelet function testing",
+    "monitoring_advice": NaN
+  },
+  "NSAIDs-danger": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Increased lithium levels reaching toxicity",
+    "description": "NSAIDs reduce renal clearance of lithium",
+    "mechanism": "AVOID NSAIDs if on lithium. Use acetaminophen for pain.",
+    "recommendation": "low",
+    "spacing_effectiveness": "Acetaminophen is safe; consider alternative mood stabilizers",
+    "alternatives": "Monitor lithium levels closely; check renal function",
+    "monitoring_advice": NaN
+  },
+  "Penicillin-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Increased methotrexate toxicity",
+    "description": "Penicillin reduces renal excretion of methotrexate",
+    "mechanism": "Monitor methotrexate levels; adjust dose if needed.",
+    "recommendation": "medium",
+    "spacing_effectiveness": "Alternative antibiotics may have less interaction",
+    "alternatives": "Check methotrexate levels; monitor for toxicity signs",
+    "monitoring_advice": NaN
+  },
+  "Metoprolol-danger": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Severe bradycardia and heart block",
+    "description": "Both medications slow AV node conduction",
+    "mechanism": "AVOID this combination. Consider alternative calcium channel blocker.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Amlodipine or nifedipine have less heart rate effect",
+    "alternatives": "Monitor heart rate and ECG; watch for dizziness/fainting",
+    "monitoring_advice": NaN
+  },
+  "Tizanidine-danger": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Severe hypotension and sedation",
+    "description": "Ciprofloxacin inhibits CYP1A2 increasing tizanidine levels",
+    "mechanism": "AVOID this combination. If necessary reduce tizanidine dose by 75%.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Alternative antibiotics: avoid fluoroquinolones",
+    "alternatives": "Monitor BP and sedation levels closely",
+    "monitoring_advice": NaN
+  },
+  "Oral Contraceptives-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Reduced contraceptive effectiveness",
+    "description": "Rifampin induces CYP enzymes increasing hormone metabolism",
+    "mechanism": "Use alternative non-hormonal contraception.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "IUD, barrier methods, or progestin-only options",
+    "alternatives": "Watch for breakthrough bleeding; consider pregnancy test",
+    "monitoring_advice": NaN
+  },
+  "Ciprofloxacin-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Increased theophylline levels and toxicity",
+    "description": "Ciprofloxacin inhibits CYP1A2 reducing theophylline clearance",
+    "mechanism": "Reduce theophylline dose by 30-50% and monitor levels.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Alternative antibiotics: azithromycin, doxycycline",
+    "alternatives": "Monitor theophylline levels; watch for nausea/vomiting",
+    "monitoring_advice": NaN
+  },
+  "Cranberry Juice-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Increased INR and bleeding risk",
+    "description": "Unknown mechanism - possibly inhibition of CYP enzymes",
+    "mechanism": "Limit cranberry juice intake; monitor INR more frequently.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Avoid cranberry juice; other juices are safe",
+    "alternatives": "Check INR within 1 week of consuming cranberry",
+    "monitoring_advice": NaN
+  },
+  "Grapefruit Juice-warning": {
+    "severity": "pharmacokinetic",
+    "interaction_type": "Increased statin levels and muscle risk",
+    "description": "Grapefruit inhibits CYP3A4 in gut wall",
+    "mechanism": "AVOID grapefruit juice; take with water instead.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Orange juice is safe; other citrus fruits are fine",
+    "alternatives": "Monitor for muscle pain; consider switching statin",
+    "monitoring_advice": NaN
+  },
+  "MAOI-danger": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Serotonin syndrome (life-threatening)",
+    "description": "Excessive serotonin accumulation in CNS",
+    "mechanism": "ABSOLUTE CONTRAINDICATION - allow 14-day washout period.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Use different antidepressant class; allow proper washout",
+    "alternatives": "Watch for agitation, confusion, fever, muscle rigidity",
+    "monitoring_advice": NaN
+  },
+  "Potassium Supplement-warning": {
+    "severity": "pharmacodynamic",
+    "interaction_type": "Hyperkalemia (high potassium levels)",
+    "description": "Both increase serum potassium",
+    "mechanism": "Monitor potassium levels; avoid potassium-containing salt substitutes.",
+    "recommendation": "not_applicable",
+    "spacing_effectiveness": "Use alternative BP meds if recurrent hyperkalemia",
+    "alternatives": "Check potassium levels regularly; watch for weakness",
+    "monitoring_advice": NaN
+  }
+}
