@@ -68,20 +68,216 @@ cp .env.example .env
 cd ..
 python -m http.server 8000
 
-🏃 Running the Application
-#Terminal 1 - Python Flask Server
-cd modules/report_analyzer
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+
+
+
+How to run :
+
+
+The Issue: Your Python Services Aren't Running Locally
+
+The error means your Node.js backend can't connect to the Drug Interaction Python module on port 5004. You need to start ALL Python services before starting the Node.js backend.
+
+Solution: Start All Services in Correct Order
+
+Step 1: Open 4 Separate Terminals
+
+You need one terminal for each Python module and one for Node.js backend.
+
+---
+
+Terminal 1: Start Report Analyzer (Port 5001)
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis/modules/report_analyzer
+
+# Activate virtual environment
+source venv/Scripts/activate
+
+# Run the module
 python app.py --port=5001
+```
 
+Keep this terminal open.
 
-#Terminal 2 - Node.js Backend
-bash
-cd backend
+---
+
+Terminal 2: Start Health Chatbot (Port 5002)
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis/modules/health_chatbot
+
+# Activate virtual environment
+source venv/Scripts/activate
+
+# Run the module
+python app_integrated.py
+```
+
+Keep this terminal open.
+
+---
+
+Terminal 3: Start Symptom Checker (Port 5003)
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis/modules/symptom_checker_ml
+
+# Activate virtual environment
+source venv/Scripts/activate
+
+# Run the module
+python app.py
+```
+
+Keep this terminal open.
+
+---
+
+Terminal 4: Start Drug Interaction (Port 5004)
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis/modules/drug_interaction
+
+# Activate virtual environment
+source venv/Scripts/activate
+
+# Run the module
+python app.py
+```
+
+Keep this terminal open.
+
+---
+
+Terminal 5: Start Node.js Backend (Port 5000)
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis/backend
+
+# Start Node.js
 npm run dev
+# OR
+node server.js
+```
 
+Keep this terminal open.
 
-#Terminal 3 - Frontend Server
-cd medical-report-analysis
+---
+
+Terminal 6: Start Frontend (Port 8000)
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis
+
+# Start HTTP server
 python -m http.server 8000
-Access the application at: http://localhost:8000
+```
+
+Keep this terminal open.
+
+---
+
+Quick Verification: Check All Ports
+
+Open a new terminal and run:
+
+```bash
+# Check Drug Interaction (port 5004)
+curl http://localhost:5004/api/drugs/health
+
+# Check Symptom Checker (port 5003)
+curl http://localhost:5003/api/symptoms/health
+
+# Check Chatbot (port 5002)
+curl http://localhost:5002/api/chatbot/health
+
+# Check Report Analyzer (port 5001)
+curl http://localhost:5001/api/report-analyzer/health
+
+# Check Node.js (port 5000)
+curl http://localhost:5000
+```
+
+All should return success messages.
+
+---
+
+Alternative: Use Your start.py Script
+
+Instead of opening 5 terminals manually, you can use your start.py script:
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis
+
+# Activate virtual environment for Python
+source venv/Scripts/activate  # If you have a root venv
+
+# Run the master script
+python start.py
+```
+
+This will start all services in one terminal. Then open another terminal for the frontend:
+
+```bash
+cd ~/Desktop/4th\ Major/project/medical-report-analysis
+python -m http.server 8000
+```
+
+---
+
+If Modules Won't Start
+
+Check if virtual environment exists:
+
+```bash
+ls -la modules/drug_interaction/venv
+```
+
+If missing, create it:
+
+```bash
+cd modules/drug_interaction
+python -m venv venv
+source venv/Scripts/activate
+pip install -r requirements.txt
+```
+
+Check if models exist for symptom checker:
+
+```bash
+ls -la modules/symptom_checker_ml/models/
+```
+
+If missing, train them:
+
+```bash
+cd modules/symptom_checker_ml
+source venv/Scripts/activate
+python train_model.py
+```
+
+Check if Pinecone index exists for chatbot:
+
+The chatbot needs Pinecone setup. Check if you ran:
+
+```bash
+cd modules/health_chatbot
+source venv/Scripts/activate
+python store_index.py
+```
+
+---
+
+Summary
+
+Service Port Command
+Report Analyzer 5001 python app.py --port=5001
+Health Chatbot 5002 python app_integrated.py
+Symptom Checker 5003 python app.py
+Drug Interaction 5004 python app.py
+Node.js Backend 5000 npm run dev
+Frontend 8000 python -m http.server 8000
+
+Start them in order (1→2→3→4→5→6) and keep all terminals open!
